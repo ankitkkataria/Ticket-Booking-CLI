@@ -5,26 +5,22 @@ package ticket.booking;
 
 
 import ticket.booking.Util.UserServiceUtil;
+import ticket.booking.entities.Ticket;
 import ticket.booking.entities.Train;
 import ticket.booking.entities.User;
 import ticket.booking.services.UserBookingService;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class App {
-
     public static void main(String[] args) {
+
         System.out.println("Running Ticket Booking System...");
         Scanner scanner = new Scanner(System.in);
-        int option = 0;
+        int option;
         UserBookingService userBookingService;
-        try {
-            userBookingService = new UserBookingService();
-        } catch (IOException e) {
-            System.out.println("Something is wrong with your app not able to create a userBookingService Object");
-        }
+        userBookingService = new UserBookingService();
 
         System.out.println("1. Sign up");
         System.out.println("2. Login");
@@ -35,6 +31,7 @@ public class App {
         System.out.println("7. Exit the App");
 
         option = scanner.nextInt();
+        Train trainSelectedForBooking = new Train();
         while (option != 7) {
             switch (option) {
                 case 1:
@@ -72,10 +69,58 @@ public class App {
                     String destination = scanner.next();
 
                     List<Train> trainsFromSrcToDestination = userBookingService.searchTrains(src, destination);
+                    int index = 1;
+                    for (Train t : trainsFromSrcToDestination) {
+                        System.out.println(index + "." + "Train id:" + t.getTrainId());
+                        index++;
+                        for (Map.Entry<String, String> entry : t.getStationTimes().entrySet()) {
+                            System.out.println("Station " + entry.getKey() + " time" + entry.getValue());
+                        }
+                        System.out.println(
+                                "Enter the train no. you want to book 1, 2, 3..."
+                        );
+
+                        trainSelectedForBooking = trainsFromSrcToDestination.get(scanner.nextInt() - 1);
+                    }
+
                     break;
-
+                case 5:
+                    System.out.println("Select the seat you want to book");
+                    List<List<Integer>> seats = userBookingService.fetchSeats(trainSelectedForBooking);
+                    for (List<Integer> row : seats) {
+                        for (Integer val : row) {
+                            System.out.println(val + " ");
+                        }
+                    }
+                    System.out.println();
+                    System.out.println("Enter the row num and the col num of the ticket you want to book");
+                    System.out.println("First enter the row");
+                    int row = scanner.nextInt();
+                    System.out.println("Enter the col");
+                    int col = scanner.nextInt();
+                    Boolean booked = userBookingService.bookTicket(trainSelectedForBooking, row, col);
+                    if(booked.equals(Boolean.TRUE)) {
+                        System.out.println("Your ticket of choice has been booked successfully");
+                    } else {
+                        System.out.println("Your ticket booking has failed");
+                    }
+                    break;
+                case 6:
+                    System.out.println("Cancelling your ticket...");
+                    userBookingService.fetchBooking();
+                    System.out.println("Tell us the ticketId of the ticket you want to cancel");
+                    String ticketId = scanner.next();
+                    try {
+                        userBookingService.cancelBooking(ticketId);
+                        System.out.println("Your ticket has been successfully cancelled.");
+                    } catch (Exception e) {
+                        System.out.println("An error occurred while cancelling your ticket. Please try again.");
+                    }
+                    break;
+                default:
+                    System.out.println("Enter a valid number!");
+                    break;
             }
-
         }
     }
 }
