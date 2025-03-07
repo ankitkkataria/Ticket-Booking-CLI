@@ -1,7 +1,9 @@
 package ticket.booking.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ticket.booking.entities.Train;
 
 import java.io.File;
@@ -16,9 +18,8 @@ import java.util.stream.IntStream;
 public class TrainService {
 
     private List<Train> trainList;
-    private ObjectMapper objectMapper;
-
-    private static final String TRAINS_PATH = "../localDb/trains.json";
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final String TRAINS_PATH = "app/src/main/java/ticket/booking/localDb/trains.json";
 
     public List<Train> loadTrains() {
      try {
@@ -27,6 +28,7 @@ public class TrainService {
             });
         }
         catch (IOException ex) {
+            System.out.println("Threw is IO exception in the TrainService my boi");
             ex.printStackTrace();
         }
      return new ArrayList<>();

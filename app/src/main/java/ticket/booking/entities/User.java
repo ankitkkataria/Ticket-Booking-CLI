@@ -1,5 +1,4 @@
 package ticket.booking.entities;
-
 import java.util.List;
 
 public class User {
@@ -13,8 +12,9 @@ public class User {
         // Default Constructor
     }
 
-    public User(String name, String hashedPassword, List<Ticket> ticketsBooked, String userId) {
+    public User(String name, String password, String hashedPassword, List<Ticket> ticketsBooked, String userId) {
         this.name = name;
+        this.password = password;
         this.hashedPassword = hashedPassword;
         this.ticketsBooked = ticketsBooked;
         this.userId = userId;
@@ -67,6 +67,4 @@ public class User {
             System.out.println(ticketsBooked.get(i).getTicketInfo());
         }
     }
-
-
 }

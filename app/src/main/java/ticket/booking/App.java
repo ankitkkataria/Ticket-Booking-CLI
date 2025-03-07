@@ -5,7 +5,6 @@ package ticket.booking;
 
 
 import ticket.booking.Util.UserServiceUtil;
-import ticket.booking.entities.Ticket;
 import ticket.booking.entities.Train;
 import ticket.booking.entities.User;
 import ticket.booking.services.UserBookingService;
@@ -14,32 +13,35 @@ import java.io.IOException;
 import java.util.*;
 
 public class App {
+    public static void getGreeting() {
+        System.out.println("hello world");
+    }
+
     public static void main(String[] args) {
 
         System.out.println("Running Ticket Booking System...");
         Scanner scanner = new Scanner(System.in);
-        int option;
         UserBookingService userBookingService;
         userBookingService = new UserBookingService();
-
-        System.out.println("1. Sign up");
-        System.out.println("2. Login");
-        System.out.println("3. Fetch Bookings");
-        System.out.println("4. Search Trains");
-        System.out.println("5. Book a Seat");
-        System.out.println("6. Cancel My Booking");
-        System.out.println("7. Exit the App");
-
-        option = scanner.nextInt();
         Train trainSelectedForBooking = new Train();
-        while (option != 7) {
+        UserBookingService signedInUserBookingService = new UserBookingService();
+        int option;
+        do {
+            System.out.println("1. Sign up");
+            System.out.println("2. Login");
+            System.out.println("3. Fetch Bookings");
+            System.out.println("4. Search Trains");
+            System.out.println("5. Book a Seat");
+            System.out.println("6. Cancel My Booking");
+            System.out.println("7. Exit the App");
+            option = scanner.nextInt();
             switch (option) {
                 case 1:
                     System.out.println("Enter the username");
                     String nameToSignUp = scanner.next();
                     System.out.println("Enter your passoword");
                     String passwordToSignUp = scanner.next();
-                    User userToSignUp = new User(nameToSignUp, UserServiceUtil.hashPassword(passwordToSignUp), new ArrayList<>(), UUID.randomUUID().toString());
+                    User userToSignUp = new User(nameToSignUp, passwordToSignUp, UserServiceUtil.hashPassword(passwordToSignUp), new ArrayList<>(), UUID.randomUUID().toString());
                     userBookingService.signUp(userToSignUp);
                     break;
 
@@ -48,9 +50,10 @@ public class App {
                     String nameToLogin = scanner.next();
                     System.out.println("Enter your passoword");
                     String passwordToLogin = scanner.next();
-                    User userToLogin = new User(nameToLogin, UserServiceUtil.hashPassword(passwordToLogin), new ArrayList<>(), UUID.randomUUID().toString());
+                    User userToLogin = new User(nameToLogin, passwordToLogin, UserServiceUtil.hashPassword(passwordToLogin), new ArrayList<>(), UUID.randomUUID().toString());
                     try {
-                        userBookingService = new UserBookingService(userToLogin);
+                        signedInUserBookingService = new UserBookingService(userToLogin);
+                        signedInUserBookingService.loginUser();
                     } catch (IOException ex) {
                         return;
                     }
@@ -58,7 +61,7 @@ public class App {
 
                 case 3:
                     System.out.println("Fetching Bookings...");
-                    userBookingService.fetchBooking();
+                    signedInUserBookingService.fetchBooking();
                     break;
 
                 case 4:
@@ -79,14 +82,13 @@ public class App {
                         System.out.println(
                                 "Enter the train no. you want to book 1, 2, 3..."
                         );
-
                         trainSelectedForBooking = trainsFromSrcToDestination.get(scanner.nextInt() - 1);
                     }
 
                     break;
                 case 5:
                     System.out.println("Select the seat you want to book");
-                    List<List<Integer>> seats = userBookingService.fetchSeats(trainSelectedForBooking);
+                    List<List<Integer>> seats = signedInUserBookingService.fetchSeats(trainSelectedForBooking);
                     for (List<Integer> row : seats) {
                         for (Integer val : row) {
                             System.out.println(val + " ");
@@ -98,8 +100,8 @@ public class App {
                     int row = scanner.nextInt();
                     System.out.println("Enter the col");
                     int col = scanner.nextInt();
-                    Boolean booked = userBookingService.bookTicket(trainSelectedForBooking, row, col);
-                    if(booked.equals(Boolean.TRUE)) {
+                    Boolean booked = signedInUserBookingService.bookTicket(trainSelectedForBooking, row, col);
+                    if (booked.equals(Boolean.TRUE)) {
                         System.out.println("Your ticket of choice has been booked successfully");
                     } else {
                         System.out.println("Your ticket booking has failed");
@@ -107,11 +109,11 @@ public class App {
                     break;
                 case 6:
                     System.out.println("Cancelling your ticket...");
-                    userBookingService.fetchBooking();
+                    signedInUserBookingService.fetchBooking();
                     System.out.println("Tell us the ticketId of the ticket you want to cancel");
                     String ticketId = scanner.next();
                     try {
-                        userBookingService.cancelBooking(ticketId);
+                        signedInUserBookingService.cancelBooking(ticketId);
                         System.out.println("Your ticket has been successfully cancelled.");
                     } catch (Exception e) {
                         System.out.println("An error occurred while cancelling your ticket. Please try again.");
@@ -121,6 +123,6 @@ public class App {
                     System.out.println("Enter a valid number!");
                     break;
             }
-        }
+        } while (option != 7);
     }
 }
